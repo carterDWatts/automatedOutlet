@@ -4,7 +4,7 @@
 
 	$fileContent=$power."\n";
 	
-	$fileStatus = file_put_contents('powerData.txt',$fileContent,FILE_APPEND);
+	$fileStatus = file_put_contents('datastorage.txt',$fileContent,FILE_APPEND);
 	
 	if($fileStatus != false){
 		echo "Wrote to file";
