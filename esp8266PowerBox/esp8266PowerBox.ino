@@ -4,6 +4,11 @@
 boolean powered = true;
 int powerPin = 5;
 
+const char* ssid = "ORBI24";
+const char* password = "jaggedcarrot123";
+
+const char* host = "carterwatts.com";
+
 void setup(){
   Serial.begin(115200);
   WiFi.begin("ORBI24","jaggedcarrot123");  // add ssid and password here
@@ -12,21 +17,11 @@ void setup(){
     delay(500);
     Serial.println("Waiting for connection");
   }
-  
-  Serial.println("Connected...");
-  delay(1000);
-  if (WiFi.status() ==WL_CONNECTED){
-    Serial.println("Wi-Fi Connected!");
-  }
-  delay(1000);
-  Serial.println("Sending message to server espcomm");
-  delay(1000);
-  int res=sendmessage("Hi,Server");
-  delay(1000);
-  if (res==1){
-    Serial.println("Send Successfully");
+
+  if (sendMessage("starting")){
+    Serial.println("Send Successful");
   } else{
-    Serial.println("Error on Server side or client side.");
+    Serial.println("Error sending");
   }
 
   pinMode(powerPin, OUTPUT);
@@ -34,15 +29,19 @@ void setup(){
 }
 
 void loop(){
-  
-  String data=receivelastmessage();
-  int response=validatemessage(data);
+ 
+  if(WiFi.status() !=3){
+    connectWiFi();
+    return;
+  }
+
+  String data=receivelastMessage();
+  int response=validateMessage(data);
   
   if (response==1){
-    
-    Serial.print("Message Received from client : ");
-    Serial.println(data);
-    handleresponse(data);
+    //Serial.print("Message Received from client : ");
+    //Serial.println(data);
+    handleResponse(data);
   }
 
   if(data == "1"){
@@ -52,7 +51,7 @@ void loop(){
       powered = false;
       Serial.println("Turning off");
   }else{
-      Serial.print("Neither 1 or 0 is the content of the most recent line");
+      Serial.print("Unusable data recieved");
   }
 
   if(powered){
@@ -65,9 +64,23 @@ void loop(){
   
 }
 
-String receivelastmessage(){
+int connectWiFi(){
+
+  Serial.println("["+String(millis())+"] ConnectWifi started");
+  WiFi.begin(ssid, password);
+ 
+  delay(2000);
+  Serial.print("Wifi stats code: ");
+  Serial.println(WiFi.status());
+ 
+  Serial.println("["+String(millis())+"] connectWifi complete");  
+  return WiFi.status();
   
-  String lastmessage="";
+}
+
+String receivelastMessage(){
+  
+  String lastMessage="";
   if(WiFi.status()==WL_CONNECTED){
     
     HTTPClient http;
@@ -76,16 +89,16 @@ String receivelastmessage(){
     http.addHeader("Content-Type","text/plain");
     int httpCode=http.GET();
     String data=http.getString();    
-    lastmessage=getlastline(data);
-    Serial.println(lastmessage);
+    lastMessage=getLastLine(data);
+    Serial.println(lastMessage);
     http.end();
   }else{
-    lastmessage="";
+    lastMessage="";
   }
-  return lastmessage;
+  return lastMessage;
 }
 
-String getlastline(String str){
+String getLastLine(String str){
   
   String s="";
   int len=str.length();
@@ -106,7 +119,7 @@ String getlastline(String str){
   return rs;
 }
 
-int validatemessage(String message){
+int validateMessage(String message){
   
   String sender="";  
   for (int i=0;i<message.length();i++){
@@ -124,9 +137,9 @@ int validatemessage(String message){
   }
 }
 
-void handleresponse(String message){
+void handleResponse(String message){
   
-  Serial.println("Sending reply to client.");
+  Serial.println("Sending reply to client");
   String mes="";
   for (int i=7;i<message.length();i++){    
     mes=mes+message[i];
@@ -134,16 +147,16 @@ void handleresponse(String message){
   
   if (mes=="hello,server"){
       
-    int response=sendmessage("server:hello,client");
+    int response=sendMessage("server:hello,client");
     if (response==1) {      
       Serial.println("Replied Successfully.");
     }else{      
-      Serial.println("Error! Check Internet Connection or Server Error!");
+      Serial.println("Error");
     }
   }
 }
 
-int sendmessage(String d){
+int sendMessage(String d){
   
   int sres;
   int net;
@@ -156,9 +169,9 @@ int sendmessage(String d){
     http.addHeader("Content-Type","text/plain");
     int httpCode=http.GET();
     String payload=http.getString();
-    Serial.println("While sending I received this from server : "+payload);
+    Serial.println("While sending, received this from server : "+payload);
     
-    if (payload=="SUCCESS. Data written in 00file."){      
+    if (payload=="Success, data written to file."){      
       sres=1;
     }else{      
       sres=0;
@@ -168,7 +181,7 @@ int sendmessage(String d){
     net=1;
     
   }else{    
-    Serial.println("Internet Problem!");
+    Serial.println("Could not send, no connection");
     net=0;
   }
   
