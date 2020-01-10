@@ -1,0 +1,13 @@
+Micro
+
+Add dynamic wifi reconnection
+Add bluetooth with wifi credentioal input
+
+Web
+
+Setup ftp for pi server
+Add controller responce section in select,
+  Writes no responce yet when clicked and when responce comes writes responce from controller
+Make buttons more attractive
+
+
