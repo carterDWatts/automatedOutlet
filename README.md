@@ -1,3 +1,3 @@
-An outlet controlled via carterwatts.xyz/select.html
+An outlet controlled via http://carterwatts.xyz/select.html
 
 
