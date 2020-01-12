@@ -6,12 +6,14 @@ int powerPin = 5;
 
 const char* ssid = "ORBI24";
 const char* password = "jaggedcarrot123";
+//const char* ssid = "HelloThere";
+//const char* password = "generalkenobi";
 
 const char* host = "carterwatts.com";
 
 void setup(){
   Serial.begin(115200);
-  WiFi.begin("ORBI24","jaggedcarrot123");  // add ssid and password here
+  WiFi.begin(ssid, password);  // add ssid and password here
 
   while(WiFi.status() !=WL_CONNECTED){
     delay(500);
@@ -31,6 +33,7 @@ void setup(){
 void loop(){
  
   if(WiFi.status() !=3){
+    Serial.println("no connection");
     connectWiFi();
     return;
   }
@@ -39,8 +42,8 @@ void loop(){
   int response=validateMessage(data);
   
   if (response==1){
-    //Serial.print("Message Received from client : ");
-    //Serial.println(data);
+    Serial.print("Data Received from client : ");
+    Serial.println(data);
     handleResponse(data);
   }
 
@@ -51,7 +54,7 @@ void loop(){
       powered = false;
       Serial.println("Turning off");
   }else{
-      Serial.print("Unusable data recieved");
+      Serial.println("No usable data");
   }
 
   if(powered){
@@ -84,7 +87,7 @@ String receivelastMessage(){
   if(WiFi.status()==WL_CONNECTED){
     
     HTTPClient http;
-    String url="http://carterwatts.xyz/datastorage.txt";
+    String url="http://carterwatts.com/datastorage.txt";
     http.begin(url);
     http.addHeader("Content-Type","text/plain");
     int httpCode=http.GET();
@@ -164,7 +167,7 @@ int sendMessage(String d){
   if (WiFi.status()==WL_CONNECTED){
     
     HTTPClient http;
-    String url="http://carterwatts.xyz/writefile.php?data="+d;
+    String url="http://carterwatts.com/writefile.php?data="+d;
     http.begin(url);
     http.addHeader("Content-Type","text/plain");
     int httpCode=http.GET();
