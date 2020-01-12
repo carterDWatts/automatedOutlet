@@ -71,7 +71,7 @@ String receivelastmessage(){
   if(WiFi.status()==WL_CONNECTED){
     
     HTTPClient http;
-    String url="http://carterwatts.xyz/datastorage.txt";
+    String url="http://carterwatts.com/powerData.txt";
     http.begin(url);
     http.addHeader("Content-Type","text/plain");
     int httpCode=http.GET();
@@ -151,7 +151,7 @@ int sendmessage(String d){
   if (WiFi.status()==WL_CONNECTED){
     
     HTTPClient http;
-    String url="http://carterwatts.xyz/writefile.php?data="+d;
+    String url="http://carterwatts.com/getIn.php?data="+d;
     http.begin(url);
     http.addHeader("Content-Type","text/plain");
     int httpCode=http.GET();
